@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam + python + api gateway (swagger) boiler template
+    
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+      Timeout: 30
+
+Resources:
+    GetPetFunction:
+      Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+      Properties:
+        FunctionName: GetPetFunction
+        CodeUri: build/
+        Handler: app.get_pet.lambda_handler.lambda_handler
+        Runtime: python3.6
+        Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+          Variables:
+            PET_NAME: "tiger"
+    
+    GetPetFunctionPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: lambda:InvokeFunction
+        FunctionName: !Ref GetPetFunction
+        Principal: apigateway.amazonaws.com
+
+    ApiGateway:
+        Type: AWS::Serverless::Api
+        Properties:
+          StageName: v1
+          DefinitionBody:
+            swagger: "2.0"
+            info:
+              version: "1.0.0"
+              title: "Swagger Petstore"
+              license:
+                name: "MIT"
+            host: "xxxxxx.com"
+            basePath: "/v1"
+            schemes:
+            - "https"
+            produces:
+            - "application/json"
+            paths:
+              /pets/{id}:
+                get:
+                  tags:
+                  - "pets"
+                  summary: "Find pet by petId."
+                  operationId: "findPetByPetId"
+                  parameters:
+                  - $ref: "#/parameters/petId"
+                  responses:
+                    "200":
+                      description: "Find pet"
+                      schema:
+                        $ref: "#/definitions/Pet"
+                  x-amazon-apigateway-integration:
+                    responses:
+                      default:
+                        statusCode: 200
+                    uri:
+                      Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPetFunction.Arn}/invocations
+                    passthroughBehavior: when_no_match
+                    httpMethod: POST
+                    type: aws_proxy
+            parameters:
+              petId:
+                name: "id"
+                in: "path"
+                description: "Id of the pet"
+                required: true
+                type: "integer"
+                format: "int64"
+            definitions:
+              Pet:
+                type: object
+                properties:
+                  id:
+                    type: "integer"
+                    format: "int64"
+                  name:
+                    type: string
+                required:
+                - id
+                - name
