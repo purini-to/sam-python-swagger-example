@@ -6,7 +6,7 @@ from app.libs.controller import Controller, validate
 PET_NAME = os.environ['PET_NAME']
 
 
-def _to_array_fields(v):
+def __to_array_fields(v):
     return compact(re.sub(r'\s*?,\s*', ',', v).split(','))
 
 # バリデーション定義
@@ -41,10 +41,10 @@ class FindPetsController(Controller):
             "data": pets
         })
 
-    def pickFields(self, pets, fields):
+    def __pickFields(self, pets, fields):
         return list(map(lambda p: pick(p, fields), pets))
 
-    def createPets(self):
+    def __createPets(self):
         """
         Petsデータを生成する
         """

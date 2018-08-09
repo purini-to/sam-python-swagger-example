@@ -8,7 +8,7 @@ class TestLambdaHandler(unittest.TestCase):
     def setUp(self):
         setup_env(self)
 
-    @patch("app.get_pet.lambda_handler.GetPetController")
+    @patch("app.find_pets.lambda_handler.FindPetsController")
     def test_lambda_handler(self, mock_controller):
         with self.env:
             instance = mock_controller.return_value
@@ -17,7 +17,7 @@ class TestLambdaHandler(unittest.TestCase):
                 "body": 'test',
             }
 
-            from app.get_pet.lambda_handler import lambda_handler
+            from app.find_pets.lambda_handler import lambda_handler
             res = lambda_handler({
                 'pathParameters': {
                     'id': '1',
