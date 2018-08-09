@@ -27,6 +27,24 @@ Resources:
         FunctionName: !Ref GetPetFunction
         Principal: apigateway.amazonaws.com
 
+    FindPetsFunction:
+      Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+      Properties:
+        FunctionName: FindPetsFunction
+        CodeUri: build/
+        Handler: app.find_pets.lambda_handler.lambda_handler
+        Runtime: python3.6
+        Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+          Variables:
+            PET_NAME: "tiger"
+    
+    FindPetsFunctionPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: lambda:InvokeFunction
+        FunctionName: !Ref FindPetsFunction
+        Principal: apigateway.amazonaws.com
+
     ApiGateway:
         Type: AWS::Serverless::Api
         Properties:
@@ -45,6 +63,38 @@ Resources:
             produces:
             - "application/json"
             paths:
+              /pets:
+                get:
+                  tags:
+                  - "pets"
+                  summary: "Find pet."
+                  operationId: "findPet"
+                  parameters:
+                  - name: "fields"
+                    in: "query"
+                    description: "a comma-separated list of fields."
+                    type: "string"
+                  responses:
+                    "200":
+                      description: "Find pet"
+                      schema:
+                        type: "object"
+                        properties:
+                          data:
+                            type: "array"
+                            items:
+                              $ref: "#/definitions/Pet"
+                        required:
+                        - data
+                  x-amazon-apigateway-integration:
+                    responses:
+                      default:
+                        statusCode: 200
+                    uri:
+                      Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FindPetsFunction.Arn}/invocations
+                    passthroughBehavior: when_no_match
+                    httpMethod: POST
+                    type: aws_proxy
               /pets/{id}:
                 get:
                   tags:
