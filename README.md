@@ -33,7 +33,7 @@ deactivate
 ├── README.md
 ├── app                         <-- Lambdaのソースコードを配置するフォルダ
 │   ├── __init__.py
-│   ├── consumer_request_count  <-- 利用者のリクエストカウント取得処理
+│   ├── xxxxxx                  <-- Lambda Function
 │   └── libs                    <-- 共通部品
 ├── constraints.txt             <-- Python依存関係バージョン固定ファイル
 ├── requirements.txt            <-- Python依存関係解決ファイル
