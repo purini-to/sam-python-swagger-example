@@ -1,5 +1,5 @@
 import json
-from app.find_pets.find_pets import FindPetsController
+from app.find_pets.find_pets_controller import FindPetsController
 from logging import getLogger, INFO
 logger = getLogger(__name__)
 logger.setLevel(INFO)
