@@ -13,7 +13,7 @@ def __to_array_fields(v):
 schema = {
     'fields': {
         'type': 'list',
-        'coerce': (str, _to_array_fields),
+        'coerce': (str, __to_array_fields),
         'allowed': ['id', 'name'],
     },
 }
@@ -33,10 +33,10 @@ class FindPetsController(Controller):
             :param self: インスタンス
             :param params: パスパラメータとクエリストリングの辞書型
         """
-        pets = self.createPets()
+        pets = self.__createPets()
         fields = params.get('fields')
         if fields:
-            pets = self.pickFields(pets, fields)
+            pets = self.__pickFields(pets, fields)
         return self.ok({
             "data": pets
         })
